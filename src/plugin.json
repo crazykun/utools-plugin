@@ -8,9 +8,11 @@
 		  "explain": "encrpyt",
 			"cmds":[
 				"encrpyt", 
-				"Decrypt", 
+				"decrypt", 
 				"加密", 
-				"解密"
+				"解密",
+				"jiami",
+				"jiemi"
 			]
 		}
 	]

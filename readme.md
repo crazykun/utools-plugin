@@ -13,3 +13,9 @@ utools加密解密插件
 - AES
 - DES
 - RC4
+
+### 截图
+![截图](https://raw.githubusercontent.com/crazykun/utools-encrypt/main/img/screenshot.png)
+
+### 使用方法
+utools搜索`加密`或`解密`即可使用
