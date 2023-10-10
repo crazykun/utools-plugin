@@ -29,10 +29,13 @@
 .tool-res {
     position:relative;
 }
-.copy{
+.copy-btns{
     position: absolute;
     z-index: 999999;
     top: 0;
     right: 0;
 }
 
+.layui-btn+.layui-btn {
+     margin-left: 0px;
+}

@@ -25,6 +25,7 @@
                                 <select name="method-encrpt" class="method-encrpt" lay-search=""
                                     lay-filter="type-filter">
                                     <option value="">请选择加密方式</option>
+                                    <option value="base64" class="">base64</option>
                                     <option value="md5" class="method-encode-only">md5</option>
                                     <option value="HmacMD5" class="method-encode-only">HmacMD5</option>
                                     <option value="SHA1" class="method-encode-only">SHA1</option>
@@ -35,11 +36,8 @@
                                     <option value="RIPEMD160" class="method-encode-only">RIPEMD160</option>
                                     <option value="AES" class="">AES-256-CBC</option>
                                     <option value="AES2" class="" selected>AES-256-ECB</option>
-                                    <option value="DES" class="">DES</option>
-                                    <option value="TripleDES" class="">TripleDES</option>
-                                    <option value="Rabbit" class="">Rabbit</option>
+                                    <option value="DES" class="">DES-64-ECB</option>
                                     <option value="RC4" class="">RC4</option>
-                                    <option value="base64" class="">base64</option>
                                 </select>
                             </div>
                         </div>
@@ -71,8 +69,11 @@
                         </div>
                         <hr>
                         <div class="tool-res">
-                            <div class="copy">
-                                <button type="button" class="layui-btn layui-btn-sm">
+                            <div class="copy-btns">
+                                <button type="button" class="layui-btn layui-btn-sm copy64">
+                                    base64
+                                </button>
+                                <button type="button" class="layui-btn layui-btn-sm copy">
                                     <i class="layui-icon layui-icon-share"></i>
                                 </button>
                             </div>
@@ -105,7 +106,7 @@
         var dfn = window.decodeFn();
         var fnMethod = '';
 
-        var saltArr = ['HmacMD5', "HmacSHA1", 'HmacSHA256', 'HmacSHA512', 'AES', 'AES2'];
+        var saltArr = ['HmacMD5', "HmacSHA1", 'HmacSHA256', 'HmacSHA512', 'AES'];
 
         // select 事件
         form.on('select(type-filter)', function (data) {
@@ -199,16 +200,10 @@
                         res = fn.AES(field.txt, field.pwd, field.salt)
                         break;
                     case "AES2":
-                        res = fn.AES2(field.txt, field.pwd, field.salt)
+                        res = fn.AES2(field.txt, field.pwd)
                         break;
                     case "DES":
-                        res = fn.DES(field.txt, field.pwd, field.salt)
-                        break;
-                    case "TripleDES":
-                        res = fn.TripleDES(field.txt, field.pwd, field.saltiv)
-                        break;
-                    case "Rabbit":
-                        res = fn.Rabbit(field.txt, field.pwd, field.salt)
+                        res = fn.DES(field.txt, field.pwd)
                         break;
                     case "RC4":
                         if (method_type === 'method-decode') {
@@ -231,6 +226,7 @@
                         break;
                 }
             } catch (error) {
+                $('.code-res').text('');
                 layer.alert(title + "失败", {
                     title: '提示'
                 });
@@ -238,7 +234,7 @@
                 return false;
             }
 
-            $('.code-res').html(res)
+            $('.code-res').text(res);
             field.res = res
             // 结果
             console.log(field)
@@ -256,6 +252,18 @@
             }
             utools.copyText(res);
             layer.msg('copy success');
+        });
+        // 复制base64事件
+        $('.copy64').on('click', function () {
+            var res = $('.code-res').val()
+            if (!res) {
+                layer.alert("请先查询", {
+                    title: '提示'
+                });
+                return false;
+            }
+            utools.copyText(btoa(res).toString());
+            layer.msg('copy base64 success');
         });
 
     });
