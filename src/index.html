@@ -22,23 +22,24 @@
                         <div class="layui-inline">
                             <label class="layui-form-label">加密方式</label>
                             <div class="layui-input-group">
-                                <select name="method-encrpt" class="method-encrpt" lay-search="" lay-filter="type-filter">
+                                <select name="method-encrpt" class="method-encrpt" lay-search=""
+                                    lay-filter="type-filter">
                                     <option value="">请选择加密方式</option>
                                     <option value="md5" class="method-encode-only">md5</option>
-                                    <option value="HmacMD5"  class="method-encode-only">HmacMD5</option>
-                                    <option value="SHA1"  class="method-encode-only">SHA1</option>
-                                    <option value="HmacSHA1"  class="method-encode-only">HmacSHA1</option>
-                                    <option value="SHA256"  class="method-encode-only">SHA256</option>
-                                    <option value="HmacSHA256"  class="method-encode-only">HmacSHA256</option>
-                                    <option value="SHA3"  class="method-encode-only">SHA3</option>
-                                    <option value="HmacSHA512"  class="method-encode-only">HmacSHA512</option>
-                                    <option value="RIPEMD160"  class="method-encode-only">RIPEMD160</option>
-                                    <option value="AES"  class="">AES-256-CBC</option>
-                                    <option value="AES2"  class="" selected>AES-256-ECB</option>
-                                    <option value="DES"  class="">DES</option>
-                                    <option value="TripleDES"  class="">TripleDES</option>
-                                    <option value="Rabbit"  class="">Rabbit</option>
-                                    <option value="RC4"  class="">RC4</option>
+                                    <option value="HmacMD5" class="method-encode-only">HmacMD5</option>
+                                    <option value="SHA1" class="method-encode-only">SHA1</option>
+                                    <option value="HmacSHA1" class="method-encode-only">HmacSHA1</option>
+                                    <option value="SHA256" class="method-encode-only">SHA256</option>
+                                    <option value="HmacSHA256" class="method-encode-only">HmacSHA256</option>
+                                    <option value="HmacSHA512" class="method-encode-only">HmacSHA512</option>
+                                    <option value="RIPEMD160" class="method-encode-only">RIPEMD160</option>
+                                    <option value="AES" class="">AES-256-CBC</option>
+                                    <option value="AES2" class="" selected>AES-256-ECB</option>
+                                    <option value="DES" class="">DES</option>
+                                    <option value="TripleDES" class="">TripleDES</option>
+                                    <option value="Rabbit" class="">Rabbit</option>
+                                    <option value="RC4" class="">RC4</option>
+                                    <option value="base64" class="">base64</option>
                                 </select>
                             </div>
                         </div>
@@ -98,13 +99,13 @@
         var layer = layui.layer;
         var form = layui.form;
         var $ = layui.$;
+        var history = utools.db.get("pwd");
 
         var efn = window.encodeFn();
         var dfn = window.decodeFn();
         var fnMethod = '';
 
-        var saltArr = ['HmacMD5', "HmacSHA1", 'HmacSHA256', 'HmacSHA512', 'RIPEMD160'];
-
+        var saltArr = ['HmacMD5', "HmacSHA1", 'HmacSHA256', 'HmacSHA512', 'AES', 'AES2'];
 
         // select 事件
         form.on('select(type-filter)', function (data) {
@@ -152,11 +153,11 @@
                         title: '提示'
                     });
                     return false;
-                }                
+                }
             } else {
                 var fn = efn;
             }
-           
+
 
             // if ($.inArray(encrpt, saltArr) !== -1 && !field.salt) {
             //     layer.alert("请输入salt", {
@@ -214,6 +215,13 @@
                             res = CryptoJS.RC4.decrypt(field.txt, field.pwd).toString(CryptoJS.enc.Utf8);
                         } else {
                             res = CryptoJS.RC4.encrypt(field.txt, field.pwd).toString();
+                        }
+                        break;
+                    case "base64":
+                        if (method_type === 'method-decode') {
+                            res = atob(field.txt).toString();
+                        } else {
+                            res = btoa(field.txt).toString();
                         }
                         break;
                     default:

@@ -10,7 +10,6 @@ window.encodeFn = function () {
     HmacSHA1: HmacSHA1, //HmacSHA1加密
     SHA256: SHA256, //SHA256加密
     HmacSHA256: HmacSHA256, //HmacSHA256加密
-    SHA3: SHA3, //SHA3加密
     HmacSHA512: HmacSHA512, //HmacSHA512加密
     RIPEMD160: RIPEMD160, //RIPEMD160加密
     AES: AES, //AES cbc加密
@@ -62,12 +61,6 @@ function HmacSHA256(str, key) {
   return encryptedMessage;
 }
 
-function SHA3(str) {
-  const hash = crypto.createHash("sha3-256");
-  hash.update(str);
-  const encryptedMessage = hash.digest("hex");
-  return encryptedMessage;
-}
 
 function HmacSHA512(str, key) {
   const hmac = crypto.createHmac("sha512", key);
@@ -84,13 +77,17 @@ function RIPEMD160(str) {
 }
 
 function AES(str, key, iv) {
+  iv = fixlength(iv, 16);
+  key = fixlength(key, 32);
   const cipher = crypto.createCipheriv("aes-256-cbc", key, iv);
   let encrypted = cipher.update(str, "utf8", "hex");
   encrypted += cipher.final("hex");
   return encrypted;
 }
-function AES2(str, key) {
-  const cipher = crypto.createCipheriv("aes-256-ecb", key);
+function AES2(str, key, iv) {
+  iv = fixlength(iv, 16);
+  key = fixlength(key, 32);
+  const cipher = crypto.createCipheriv("aes-256-ecb", key, iv);
   let encrypted = cipher.update(str, "utf8", "hex");
   encrypted += cipher.final("hex");
   return encrypted;
@@ -131,12 +128,16 @@ window.decodeFn = function () {
 };
 
 function _AES(str, key, iv) {
+  iv = fixlength(iv, 16);
+  key = fixlength(key, 32);
   const decipher = crypto.createDecipheriv("aes-256-cbc", key, iv);
   let decrypted = decipher.update(str, "hex", "utf8");
   decrypted += decipher.final("utf8");
   return decrypted;
 }
 function _AES2(str, key, iv) {
+  iv = fixlength(iv, 16);
+  key = fixlength(key, 32);
   const decipher = crypto.createDecipheriv("aes-256-ecb", key, iv);
   let decrypted = decipher.update(str, "hex", "utf8");
   decrypted += decipher.final("utf8");
@@ -162,4 +163,14 @@ function _Rabbit(str, key, iv) {
   let decrypted = decipher.update(str, "hex", "utf8");
   decrypted += decipher.final("utf8");
   return decrypted;
+}
+
+
+function fixlength(str, lenght) {
+  if (str.length < lenght) {
+    str = str.padEnd(lenght, "0");
+  } else if (str.length > lenght) {
+    str = str.substring(0, lenght);
+  }
+  return str;  
 }
