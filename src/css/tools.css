@@ -1,0 +1,38 @@
+.tool-content-container{
+    padding: 10px;
+}
+
+.salt{
+    display: none;
+}
+.method2{
+    display: none;
+}
+
+.ws-footer {
+    padding: 0px 15px;
+    line-height: 30px;
+    text-align: center;
+    color: #777
+}
+
+.ws-footer a {
+    padding: 0 5px;
+    color: #777
+}
+
+.ws-footer a:hover {
+    color: #1e9fff;
+    text-decoration: underline
+}
+
+.tool-res {
+    position:relative;
+}
+.copy{
+    position: absolute;
+    z-index: 999999;
+    top: 0;
+    right: 0;
+}
+

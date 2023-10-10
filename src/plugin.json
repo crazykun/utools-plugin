@@ -1,0 +1,17 @@
+{
+	"main": "index.html",
+	"preload": "preload.js",
+	"logo": "img/logo.png",
+	"features": [
+		{
+		  "code": "encrpyt",
+		  "explain": "encrpyt",
+			"cmds":[
+				"encrpyt", 
+				"Decrypt", 
+				"加密", 
+				"解密"
+			]
+		}
+	]
+}

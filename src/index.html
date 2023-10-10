@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>加密&解密</title>
+    <link href="layui/css/layui.css" rel="stylesheet">
+    <link href="css/tools.css" rel="stylesheet">
+</head>
+
+<body>
+    <form class="layui-form layui-form-pane" action="">
+        <div class="tool-content-container layui-form layui-field-box">
+            <fieldset class="layui-elem-field">
+                <legend>加密&解密</legend>
+                <div class="layui-field-box">
+                    <div class="layui-form-item">
+                        <textarea name="txt" placeholder="待处理的内容" class="layui-textarea"></textarea>
+                    </div>
+                    <div class="layui-form-item">
+                        <div class="layui-inline">
+                            <label class="layui-form-label">加密方式</label>
+                            <div class="layui-input-group">
+                                <select name="method-encrpt" class="method-encrpt" lay-search="" lay-filter="type-filter">
+                                    <option value="">请选择加密方式</option>
+                                    <option value="md5" class="method-encode-only">md5</option>
+                                    <option value="HmacMD5"  class="method-encode-only">HmacMD5</option>
+                                    <option value="SHA1"  class="method-encode-only">SHA1</option>
+                                    <option value="HmacSHA1"  class="method-encode-only">HmacSHA1</option>
+                                    <option value="SHA256"  class="method-encode-only">SHA256</option>
+                                    <option value="HmacSHA256"  class="method-encode-only">HmacSHA256</option>
+                                    <option value="SHA3"  class="method-encode-only">SHA3</option>
+                                    <option value="HmacSHA512"  class="method-encode-only">HmacSHA512</option>
+                                    <option value="RIPEMD160"  class="method-encode-only">RIPEMD160</option>
+                                    <option value="AES"  class="">AES-256-CBC</option>
+                                    <option value="AES2"  class="" selected>AES-256-ECB</option>
+                                    <option value="DES"  class="">DES</option>
+                                    <option value="TripleDES"  class="">TripleDES</option>
+                                    <option value="Rabbit"  class="">Rabbit</option>
+                                    <option value="RC4"  class="">RC4</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="layui-form-item salt">
+                        <label class="layui-form-label">salt</label>
+                        <div class="layui-input-group">
+                            <input type="text" name="salt" lay-verify="" placeholder="请输入salt" class="layui-input">
+                        </div>
+                    </div>
+                    <div class="layui-form-item">
+                        <div class="layui-inline">
+                            <label class="layui-form-label">密钥</label>
+                            <div class="layui-input-group">
+                                <input type="text" name="pwd" lay-verify="" placeholder="请输入密码" class="layui-input">
+                                <div class="layui-input-split layui-input-suffix">
+                                    <i class="layui-icon layui-icon-form"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="layui-inline">
+                            <input type="radio" name="type" value="method-encode" title="加密" lay-filter="type-filter"
+                                checked>
+                            <input type="radio" name="type" value="method-decode" title="解密" lay-filter="type-filter">
+                        </div>
+                        <div class="layui-inline">
+                            <button type="button" class="layui-btn layui-btn" lay-filter="demo-submit" lay-on="get-res"
+                                lay-submit>查询</button>
+                        </div>
+                        <hr>
+                        <div class="tool-res">
+                            <div class="copy">
+                                <button type="button" class="layui-btn layui-btn-sm">
+                                    <i class="layui-icon layui-icon-share"></i>
+                                </button>
+                            </div>
+                            <div class="layui-form-item">
+                                <textarea name="result" placeholder="结果" class="layui-textarea code-res"></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </fieldset>
+        </div>
+    </form>
+    <div class="layui-footer ws-footer">
+        <p>Copyright © 2023 </p>
+    </div>
+</body>
+<script type="text/javascript" src="layui/layui.js"></script>
+<script type="text/javascript" src="js/crypto-js-4.1.1/crypto-js.js"></script>
+
+<script>
+    // Usage
+    layui.use(function () {
+        var layer = layui.layer;
+        var form = layui.form;
+        var $ = layui.$;
+
+        var efn = window.encodeFn();
+        var dfn = window.decodeFn();
+        var fnMethod = '';
+
+        var saltArr = ['HmacMD5', "HmacSHA1", 'HmacSHA256', 'HmacSHA512', 'RIPEMD160'];
+
+
+        // select 事件
+        form.on('select(type-filter)', function (data) {
+            var value = data.value; // 获得被选中的值
+            fnMethod = value;
+            // 判断value在数组内显示, 其他隐藏
+            if ($.inArray(value, saltArr) !== -1) {
+                $('.salt').show();
+            } else {
+                $('.salt').hide();
+            }
+        });
+
+        // radio 事件
+        form.on('radio(type-filter)', function (data) {
+            var elem = data.elem; // 获得 radio 原始 DOM 对象
+            var value = elem.value; // 获得 radio 值
+            if (value == 'method-decode') {
+                $(".method-encode-only").attr("disabled", "disabled")
+            } else {
+                $(".method-encode-only").removeAttr("disabled")
+            }
+            form.render('select');
+        });
+
+        // 提交事件
+        form.on('submit(demo-submit)', function (data) {
+            var field = data.field; // 获取表单全部字段值
+            var res = '';
+            var encrpt = field['method-encrpt'];
+            if (!encrpt) {
+                layer.alert("请选择加密方式", {
+                    title: '提示'
+                });
+                return false;
+            }
+            var method_type = field.type;
+            var title = '加密';
+            if (method_type === 'method-decode') {
+                title = '解密';
+                var fn = dfn;
+                // 判断当前method-encrpt下拉select选中的加密方式含有disabled属性, 则不允许解密
+                if ($(".method-encrpt option:selected").attr("disabled") == "disabled") {
+                    layer.alert("当前加密方式不支持解密", {
+                        title: '提示'
+                    });
+                    return false;
+                }                
+            } else {
+                var fn = efn;
+            }
+           
+
+            // if ($.inArray(encrpt, saltArr) !== -1 && !field.salt) {
+            //     layer.alert("请输入salt", {
+            //         title: '提示'
+            //     });
+            //     return false;
+            // }
+
+            try {
+                switch (encrpt) {
+                    case "md5":
+                        res = fn.md5(field.txt)
+                        break;
+                    case "HmacMD5":
+                        res = fn.HmacMD5(field.txt, field.salt)
+                        break;
+                    case "SHA1":
+                        res = fn.SHA1(field.txt)
+                        break;
+                    case "HmacSHA1":
+                        res = fn.HmacSHA1(field.txt, field.salt)
+                        break;
+                    case "SHA256":
+                        res = fn.SHA256(field.txt)
+                        break;
+                    case "HmacSHA256":
+                        res = fn.HmacSHA256(field.txt, field.salt)
+                        break;
+                    case "SHA3":
+                        res = fn.SHA3(field.txt)
+                        break;
+                    case "HmacSHA512":
+                        res = fn.HmacSHA512(field.txt, field.salt)
+                        break;
+                    case "RIPEMD160":
+                        res = fn.RIPEMD160(field.txt)
+                        break;
+                    case "AES":
+                        res = fn.AES(field.txt, field.pwd, field.salt)
+                        break;
+                    case "AES2":
+                        res = fn.AES2(field.txt, field.pwd, field.salt)
+                        break;
+                    case "DES":
+                        res = fn.DES(field.txt, field.pwd, field.salt)
+                        break;
+                    case "TripleDES":
+                        res = fn.TripleDES(field.txt, field.pwd, field.saltiv)
+                        break;
+                    case "Rabbit":
+                        res = fn.Rabbit(field.txt, field.pwd, field.salt)
+                        break;
+                    case "RC4":
+                        if (method_type === 'method-decode') {
+                            res = CryptoJS.RC4.decrypt(field.txt, field.pwd).toString(CryptoJS.enc.Utf8);
+                        } else {
+                            res = CryptoJS.RC4.encrypt(field.txt, field.pwd).toString();
+                        }
+                        break;
+                    default:
+                        layer.alert("请选择加密方式", {
+                            title: '提示'
+                        });
+                        break;
+                }
+            } catch (error) {
+                layer.alert(title + "失败", {
+                    title: '提示'
+                });
+                console.log(error)
+                return false;
+            }
+
+            $('.code-res').html(res)
+            field.res = res
+            // 结果
+            console.log(field)
+            return true;
+        });
+
+        // 复制事件
+        $('.copy').on('click', function () {
+            var res = $('.code-res').val()
+            if (!res) {
+                layer.alert("请先查询", {
+                    title: '提示'
+                });
+                return false;
+            }
+            utools.copyText(res);
+            layer.msg('copy success');
+        });
+
+    });
+</script>
+
+</html>
