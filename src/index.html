@@ -36,6 +36,7 @@
                                     <option value="RIPEMD160" class="method-encode-only">RIPEMD160</option>
                                     <option value="AES" class="">AES-256-CBC</option>
                                     <option value="AES2" class="" selected>AES-256-ECB</option>
+                                    <option value="AES3" class="">AES-256-ECB(base64)</option>
                                     <option value="DES" class="">DES-64-ECB</option>
                                     <option value="RC4" class="">RC4</option>
                                 </select>
@@ -200,7 +201,10 @@
                         res = fn.AES(field.txt, field.pwd, field.salt)
                         break;
                     case "AES2":
-                        res = fn.AES2(field.txt, field.pwd)
+                        res = fn.AES2(field.txt, field.pwd, 'hex')
+                        break;
+                    case "AES3":
+                        res = fn.AES2(txt, field.pwd, 'base64')
                         break;
                     case "DES":
                         res = fn.DES(field.txt, field.pwd)

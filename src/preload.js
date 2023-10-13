@@ -118,10 +118,10 @@ function _AES(str, key, iv) {
   decrypted += decipher.final("utf8");
   return decrypted;
 }
-function _AES2(str, key) {
+function _AES2(str, key, type) {
   key = fixlength(key, 32);
   const decipher = crypto.createDecipheriv("aes-256-ecb", key, null);
-  let decrypted = decipher.update(str, "hex", "utf8");
+  let decrypted = decipher.update(str, type, "utf8");
   decrypted += decipher.final("utf8");
   return decrypted;
 }
