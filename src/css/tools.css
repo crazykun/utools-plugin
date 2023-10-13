@@ -39,3 +39,7 @@
 .layui-btn+.layui-btn {
      margin-left: 0px;
 }
+
+.pwd-wrapper{
+    display: none;
+}

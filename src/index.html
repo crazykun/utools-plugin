@@ -54,8 +54,8 @@
                             <label class="layui-form-label">密钥</label>
                             <div class="layui-input-group">
                                 <input type="text" name="pwd" lay-verify="" placeholder="请输入密码" class="layui-input">
-                                <div class="layui-input-split layui-input-suffix">
-                                    <i class="layui-icon layui-icon-form"></i>
+                                <div class="layui-input-split layui-input-suffix" lay-on="pwd-page">
+                                    <i class="layui-icon layui-icon-form" style="color:#16baaa"></i>
                                 </div>
                             </div>
                         </div>
@@ -91,7 +91,18 @@
     <div class="layui-footer ws-footer">
         <p>Copyright © 2023 </p>
     </div>
+    <div class="pwd-wrapper">
+        <div style="padding:16px;">
+            <table class="layui-hide" id="pwd-table"></table>
+        </div>
+    </div>
 </body>
+<script type="text/html" id="copy-tool">
+    <div class="layui-clear-space">
+      <a class="layui-btn layui-btn-primary layui-btn-xs" lay-event="detail">使用</a>
+    </div>
+  </script>
+<script type="text/javascript" src="js/tools.js"></script>
 <script type="text/javascript" src="layui/layui.js"></script>
 <script type="text/javascript" src="js/crypto-js-4.1.1/crypto-js.js"></script>
 
@@ -101,7 +112,9 @@
         var layer = layui.layer;
         var form = layui.form;
         var $ = layui.$;
-        var history = utools.db.get("pwd");
+        var util = layui.util;
+        var table = layui.table;
+        var history = 'pwdHistory';
 
         var efn = window.encodeFn();
         var dfn = window.decodeFn();
@@ -133,6 +146,59 @@
             form.render('select');
         });
 
+
+        // 事件
+        util.on('lay-on', {
+            'pwd-page': function () {
+                var result = utools.dbStorage.getItem(history);
+                if (!result) {
+                    result = [];
+                }
+
+                // 创建渲染实例
+                table.render({
+                    elem: '#pwd-table',
+                    data: result,
+                    page: false,
+                    cols: [[
+                        { field: 'val', width: 150, title: '密码', edit: "editable" },
+                        { field: 'name', width: 150, title: '备注', edit: "editable" },
+                        // { width:70, title: '操作', templet: '#copy-tool'}
+                    ]],
+                    css: [
+                        // 对开启了编辑的单元格追加样式
+                        '.layui-table-view td[data-edit]{color: #16B777;}'
+                    ].join(''),
+                });
+
+                layer.open({
+                    type: 1,
+                    // shade: false, // 不显示遮罩
+                    title: '历史密码',
+                    content: $('.pwd-wrapper'),
+                    end: function () {
+                        // layer.msg('关闭后的回调', {icon:6});
+                    }
+                });
+            },
+        });
+
+        // 单元格编辑后的事件
+        table.on('edit(pwd-table)', function (obj) {
+            items = table.cache["pwd-table"]
+            // 循环items元素, 删除LAY_NUM和LAY_INDEX
+            for (var i = 0; i < items.length; i++) {
+                delete items[i].LAY_TABLE_INDEX
+                delete items[i].LAY_TABLE_NUM
+            }
+            // 更新
+            utools.dbStorage.setItem(history, items);
+            
+            // 显示 - 仅用于演示
+            layer.msg('update succss');
+        });
+
+
         // 提交事件
         form.on('submit(demo-submit)', function (data) {
             var field = data.field; // 获取表单全部字段值
@@ -159,6 +225,18 @@
             } else {
                 var fn = efn;
             }
+
+            var newItems = {"val":field.pwd,"name":""};
+            var historyItems = utools.dbStorage.getItem(history);
+            if (!historyItems) {
+                historyItems = [newItems];
+            } else {
+                historyItems.unshift(newItems);
+                if (historyItems.length > 10) {
+                    historyItems.pop()
+                }
+            }
+            utools.dbStorage.setItem(history, historyItems);
 
 
             // if ($.inArray(encrpt, saltArr) !== -1 && !field.salt) {
