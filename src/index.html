@@ -174,6 +174,7 @@
                 layer.open({
                     type: 1,
                     // shade: false, // 不显示遮罩
+                    shadeClose: true, // 点击遮罩区域，关闭弹层
                     title: '历史密码',
                     content: $('.pwd-wrapper'),
                     end: function () {
@@ -193,7 +194,7 @@
             }
             // 更新
             utools.dbStorage.setItem(history, items);
-            
+
             // 显示 - 仅用于演示
             layer.msg('update succss');
         });
@@ -226,17 +227,31 @@
                 var fn = efn;
             }
 
-            var newItems = {"val":field.pwd,"name":""};
-            var historyItems = utools.dbStorage.getItem(history);
-            if (!historyItems) {
-                historyItems = [newItems];
-            } else {
-                historyItems.unshift(newItems);
-                if (historyItems.length > 10) {
-                    historyItems.pop()
+
+            // 保存历史记录
+            if (field.pwd) {
+                var newItems = { "val": field.pwd, "name": "" };
+                var historyItems = utools.dbStorage.getItem(history);
+                if (!historyItems) {
+                    historyItems = [newItems];
+                } else {
+                    // 判断是否已存在
+                    var isExist = false;
+                    for (var i = 0; i < historyItems.length; i++) {
+                        if (historyItems[i].val === field.pwd) {
+                            isExist = true;
+                            break;
+                        }
+                    }
+                    if (!isExist) {
+                        historyItems.unshift(newItems);
+                        if (historyItems.length > 10) {
+                            historyItems.pop()
+                        }
+                        utools.dbStorage.setItem(history, historyItems);
+                    }
                 }
             }
-            utools.dbStorage.setItem(history, historyItems);
 
 
             // if ($.inArray(encrpt, saltArr) !== -1 && !field.salt) {
