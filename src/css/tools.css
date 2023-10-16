@@ -36,10 +36,13 @@
     right: 0;
 }
 
-.layui-btn+.layui-btn {
+.copy-btns .layui-btn+.layui-btn {
      margin-left: 0px;
 }
 
 .pwd-wrapper{
     display: none;
+}
+.del-btn{
+    margin-left: 7px;
 }

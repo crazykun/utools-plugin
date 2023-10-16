@@ -99,7 +99,8 @@
 </body>
 <script type="text/html" id="copy-tool">
     <div class="layui-clear-space">
-      <a class="layui-btn layui-btn-primary layui-btn-xs" lay-event="detail">使用</a>
+      <a class="layui-btn layui-btn-primary layui-btn-xs use-btn" lay-event="detail">使用</a>
+      <a class="layui-btn layui-btn-primary layui-btn-xs del-btn" lay-event="del">删除</a>
     </div>
   </script>
 <script type="text/javascript" src="js/tools.js"></script>
@@ -163,7 +164,7 @@
                     cols: [[
                         { field: 'val', width: 150, title: '密码', edit: "editable" },
                         { field: 'name', width: 150, title: '备注', edit: "editable" },
-                        // { width:70, title: '操作', templet: '#copy-tool'}
+                        { width: 100, title: '操作', templet: '#copy-tool' }
                     ]],
                     css: [
                         // 对开启了编辑的单元格追加样式
@@ -197,6 +198,28 @@
 
             // 显示 - 仅用于演示
             layer.msg('update succss');
+        });
+
+        // 使用/删除 历史密码
+        table.on('tool(pwd-table)', function (obj) {
+            var data = obj.data;
+            var layEvent = obj.event;
+            if (layEvent === 'detail') {
+                $('.layui-input[name="pwd"]').val(data.val);
+                layer.closeAll();
+            } else if (layEvent === 'del') {
+                var historyItems = utools.dbStorage.getItem(history);
+                // 检测历史项目中, 是否存在当前删除的项目并删除
+                for (var i = 0; i < historyItems.length; i++) {
+                    if (historyItems[i].val === data.val) {
+                        historyItems.splice(i, 1);
+                        break;
+                    }
+                }
+                utools.dbStorage.setItem(history, historyItems);
+                // 刷新表格
+                obj.del();
+            }
         });
 
 
