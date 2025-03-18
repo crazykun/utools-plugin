@@ -1,32 +1,36 @@
-# utools插件
+# utools-plugin
 
-encrpt: 加密解密插件
-ip: ip查询插件
+## utools插件
 
+- encrpt: 加密解密插件
 
-## 加密解密
-utools加密解密插件
+    `加密解密 是一款为utool开发的插件工具, 方便加密解密测试。`
+- ip: ip归属地查询插件
 
-### 工具介绍
-加密解密是一款为utool开发的插件工具, 方便加密解密测试。
+    `utools ip归属地查询`
+- var: 变量名生成插件
 
+    `变量名生成插件`
 
-### 支持方法
-- md5
-- sha1
-- sha256
-- RIPEMD160
-- AES
-- DES
-- RC4
-
-### 截图
-![截图](https://raw.githubusercontent.com/crazykun/utools-encrypt/main/img/screeshot.png)
 
 ### 使用方法
-utools搜索`加密`或`解密`即可使用
+
+utools搜索
+`加密`或`解密` 打开加密解密插件 | md5| sha1| sha256| RIPEMD160| AES| DES| RC4
+
+`ip` 打开ip归属地查询插件
+`var` 打开变量名生成插件
+
+
+### 截图
+
+![截图](https://raw.githubusercontent.com/crazykun/utools-plugin/main/img/encrpt.png)
+![截图](https://raw.githubusercontent.com/crazykun/utools-ip/main/img/ip.png)
+
+
 
 ### 浏览器打开
 
-[本地utools](utools://加密解密)
-utools://加密解密
+[加密解密](utools://加密解密)
+[IP](utools://ip)
+[变量名生成](utools://var)
