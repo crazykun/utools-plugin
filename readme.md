@@ -1,3 +1,9 @@
+# utools插件
+
+encrpt: 加密解密插件
+ip: ip查询插件
+
+
 ## 加密解密
 utools加密解密插件
 
