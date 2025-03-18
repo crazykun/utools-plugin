@@ -1,39 +1,49 @@
-# utools-plugin
+# utools插件合集
 
-## utools插件
+## 项目简介
 
-- encrpt: 加密解密插件
+一套轻量级的UTools桌面工具插件集合，包含加密解密、IP查询和变量名生成三大实用工具，帮助开发者快速完成日常开发辅助任务。
 
-    `加密解密 是一款为utool开发的插件工具, 方便加密解密测试。`
-- ip: ip归属地查询插件
+## 插件列表
 
-    `utools ip归属地查询`
-- var: 变量名生成插件
+| 插件名称 | 功能描述 | 支持格式/算法 |
+|---------|---------|-------------|
+| **加密解密** | 多算法加密解密测试工具 | MD5/SHA1/SHA256/RIPEMD160/AES/DES/RC4 |
+| **IP查询** | 实时IP归属地查询 | 地理位置/运营商/地区编码 |
+| **变量名生成** | 代码变量名智能生成 | 支持驼峰/下划线等多种命名规范 |
 
-    `变量名生成插件`
+## 使用指南
+
+1. **安装插件**  
+   通过UTools应用市场搜索插件名称安装
+2. **快速启动**  
+   - 通过UTools搜索栏输入关键词：
+     - `加密`/`解密` → 打开加密解密工具
+     - `IP` → 启动IP查询插件
+     - `var` → 使用变量名生成器
+3. **操作示例**  
+
+   ```bash
+   # 加密示例
+   输入文本 → 选择算法 → 一键生成加密结果
+   # IP查询
+   输入IP地址 → 获取地理位置信息
+   # 变量生成
+   输入关键词 → 生成符合规范的变量名建议
+   ```
 
 
-### 使用方法
+## 功能截图演示
 
-utools搜索
-`加密`或`解密` 打开加密解密插件 | md5| sha1| sha256| RIPEMD160| AES| DES| RC4
+| 插件 | 功能截图 |
+|------|----------|
+| 加密解密 | ![加密解密界面](https://raw.githubusercontent.com/crazykun/utools-plugin/main/img/encrpt.png) |
+| IP查询 | ![IP查询界面](https://raw.githubusercontent.com/crazykun/utools-plugin/main/img/ip.png) |
+| 变量生成 | ![变量生成界面](https://raw.githubusercontent.com/crazykun/utools-plugin/main/img/var.png) |
 
-`ip` 打开ip归属地查询插件
-`var` 打开变量名生成插件
+## 快捷入口
 
-
-### 截图
-
-![截图](https://raw.githubusercontent.com/crazykun/utools-plugin/main/img/encrpt.png)
-![截图](https://raw.githubusercontent.com/crazykun/utools-plugin/main/img/ip.png)
-![截图](https://raw.githubusercontent.com/crazykun/utools-plugin/main/img/var.png)
-
-
-
-### 浏览器打开
-
-[加密解密](utools://加密解密)
-
-[IP](utools://ip)
-
-[变量名生成](utools://var)
+> 提示：可通过以下链接快速跳转（需UTools客户端支持）
+[加密解密](utools://加密解密)  
+[IP查询](utools://ip)  
+[变量生成](utools://var)
