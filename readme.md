@@ -25,7 +25,7 @@ utools搜索
 ### 截图
 
 ![截图](https://raw.githubusercontent.com/crazykun/utools-plugin/main/img/encrpt.png)
-![截图](https://raw.githubusercontent.com/crazykun/utools-ip/main/img/ip.png)
+![截图](https://raw.githubusercontent.com/crazykun/utools-plugin/main/img/ip.png)
 
 
 
