@@ -1,0 +1,25 @@
+{
+  "pluginName": "IP",
+  "description": "ip归属地查询",
+  "homepage": "https://github.com/crazykun/utools-ip",
+  "author": "crazykun",
+  "main": "index.html",
+  "logo": "logo.png",
+  "preload": "preload.js",
+  "version": "1.0.0",
+  "features": [
+    {
+      "code": "ip",
+      "explain": "ip",
+      "cmds": [
+        "ip",
+        "IP",
+        {
+          "type": "regex",
+          "match": "/^\\b(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\b/i",
+          "label": "ip匹配"
+        }
+      ]
+    }
+  ]
+}

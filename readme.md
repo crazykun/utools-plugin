@@ -32,5 +32,7 @@ utools搜索
 ### 浏览器打开
 
 [加密解密](utools://加密解密)
+
 [IP](utools://ip)
+
 [变量名生成](utools://var)

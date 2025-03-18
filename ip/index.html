@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>IP归属地查询</title>
+    <link href="layui/css/layui.css" rel="stylesheet">
+    <link href="css/index.css" rel="stylesheet">
+    <style>
+        body {
+            margin-bottom: 60px;
+        }
+
+        .layui-form-item .layui-input-inline {
+            width: 500px;
+        }
+
+        .layui-footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background-color: #fafafa;
+            color: #aaa;
+            text-align: center;
+            padding: 10px 0;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="layui-container" style="margin-top: 50px;">
+        <div class="layui-row">
+            <div class="layui-col-md8 layui-col-md-offset2">
+                <div class="layui-form">
+                    <div class="layui-form-item">
+                        <div class="layui-">
+                            <label class="layui-form-label">IP地址：</label>
+                            <div class="layui-input-inline layui-input-wrap">
+                                <input type="text" id="ipInput" placeholder="请输入IP地址" class="layui-input">
+                            </div>
+                            <div class="layui-form-mid" style="padding: 0!important;">
+                                <button type="button" class="layui-btn" id="queryBtn">查询</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <table class="layui-table" id="resultTable">
+                    <thead>
+                        <tr>
+                            <th>渠道</th>
+                            <th width="120">IP地址</th>
+                            <th>国家</th>
+                            <th>省份</th>
+                            <th>城市</th>
+                            <th>ISP</th>
+                        </tr>
+                    </thead>
+                    <tbody id="resultBody">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- 底部固定区域 -->
+        <div class="layui-footer">
+            https://github.com/crazykun/utools-ip
+        </div>
+        <!-- 底部固定区域 -->
+    </div>
+
+    <script src="./layui/layui.js"></script>
+    <script>
+        //JS 
+        layui.use(['element', 'layer', 'util', 'form'], function () {
+            var element = layui.element
+                , layer = layui.layer
+                , util = layui.util
+                , form = layui.form
+                , $ = layui.$;
+
+
+            $('#queryBtn').click(async function () {
+                var ip = $('#ipInput').val();
+                var resultSucc = 0
+                $('#resultBody').html("");
+
+                try {
+                    // 等待第一个Ajax请求完成
+                    const firstResponse = await new Promise((resolve, reject) => {
+                        $.ajax({
+                            url: 'https://ipapi.co/' + ip + '/json/',
+                            method: 'GET',
+                            success: function (data) {
+                                resolve(data);
+                            },
+                            error: reject
+                        });
+                    });
+
+                    if (!firstResponse.error) {
+                        resultSucc++;
+                        resultBody =
+                            '<tr>' +
+                            '<td>ipapi</td>' +
+                            '<td>' + firstResponse.ip + '</td>' +
+                            '<td>' + firstResponse.country_name + '</td>' +
+                            '<td>' + (firstResponse.region || 'N/A') + '</td>' +
+                            '<td>' + (firstResponse.city || 'N/A') + '</td>' +
+                            '<td>' + (firstResponse.org || 'N/A') + '</td>' +
+                            '</tr>'
+                            ;
+                        $('#resultBody').html(resultBody);
+                        if (!ip) {
+                            ip = firstResponse.ip;
+                            $('#ipInput').val(firstResponse.ip);
+                        }
+                    }
+
+                    if (!ip) {
+                        if (resultSucc == 0) {
+                            layer.msg('请输入IP地址');
+                        }
+                        return;
+                    }
+
+                    // 发起第二个Ajax请求并等待其完成
+                    const secondResponse = await new Promise((resolve, reject) => {
+                        $.ajax({
+                            url: 'https://qifu.baidu.com/ip/geo/v1/district?ip=' + ip,
+                            method: 'GET',
+                            success: function (data) {
+                                resolve(data);
+                            },
+                            error: reject
+                        });
+                    });
+
+                    if (!secondResponse.error) {
+                        resultSucc++;
+                        resultBody +=
+                            '<tr>' +
+                            '<td>百度</td>' +
+                            '<td>' + secondResponse.ip + '</td>' +
+                            '<td>' + secondResponse.data.country + '</td>' +
+                            '<td>' + (secondResponse.data.prov || 'N/A') + '</td>' +
+                            '<td>' + (secondResponse.data.city || 'N/A') + '</td>' +
+                            '<td>' + (secondResponse.data.isp || 'N/A') + '</td>' +
+                            '</tr>'
+                            ;
+                        $('#resultBody').html(resultBody);
+                    }
+                } catch (error) {
+                    console.error('请求出错', error);
+                }
+            });
+
+
+            // 从utools中获取数据
+            utools.onPluginEnter(({code, type, payload, option }) => {
+                console.log('onPluginEnter', code, type, payload, option);
+                if (type == 'regex') {
+                    $('#ipInput').val(payload);
+                }
+                $('#queryBtn').click();
+            })
+
+        });
+    </script>
+</body>
+
+</html>
