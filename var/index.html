@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>变量变变变</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            margin: 20px; 
+            background-color: #f4f4f9;
+            color: #333;
+            line-height: 1.6;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 10px 15px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 20px;
+            box-sizing: border-box;
+            font-size: 1em;
+            transition: border-color 0.3s ease-in-out;
+        }
+        input[type="text"]:focus {
+            border-color: #007bff;
+            outline: none;
+            box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+        }
+        .conversion-list {
+            list-style-type: none;
+            padding: 0;
+        }
+        .conversion-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #fff;
+            padding: 8px;
+            margin-bottom: 8px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .conversion-name {
+            width: 20%;
+        }
+        .conversion-description {
+            font-weight: bold;
+        }
+        .conversion-remark {
+            font-size: 0.8em;
+            color: #666;
+        }
+        .conversion-result {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #333;
+            cursor: pointer;
+            text-align: center;
+            width: 100%;
+            display: block;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            white-space: normal;
+        }
+        .copy-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .copy-button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 4px 8px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .copy-button:hover {
+            background-color: #0056b3;
+        }
+        .shortcut {
+            font-size: 0.8em;
+            color: #666;
+            margin-top: 5px;
+        }
+        .toast {
+            visibility: hidden;
+            min-width: 250px;
+            margin-left: -125px;
+            background-color: #333;
+            color: #fff;
+            text-align: center;
+            border-radius: 5px;
+            padding: 10px;
+            position: fixed;
+            z-index: 1;
+            left: 50%;
+            bottom: 30px;
+            font-size: 17px;
+        }
+
+        .toast.show {
+            visibility: visible;
+            -webkit-animation: fadein 0.5s, fadeout 0.5s 2.5s;
+            animation: fadein 0.5s, fadeout 0.5s 2.5s;
+        }
+
+        @-webkit-keyframes fadein {
+            from {bottom: 0; opacity: 0;}
+            to {bottom: 30px; opacity: 1;}
+        }
+
+        @keyframes fadein {
+            from {bottom: 0; opacity: 0;}
+            to {bottom: 30px; opacity: 1;}
+        }
+
+        @-webkit-keyframes fadeout {
+            from {bottom: 30px; opacity: 1;}
+            to {bottom: 0; opacity: 0;}
+        }
+
+        @keyframes fadeout {
+            from {bottom: 30px; opacity: 1;}
+            to {bottom: 0; opacity: 0;}
+        }
+    </style>
+</head>
+<body>
+    <input type="text" id="inputVariable" placeholder="Enter variable name" oninput="convertVariable()">
+    <ul class="conversion-list" id="output">
+
+    </ul>
+
+    <div id="toast" class="toast">Copied to clipboard!</div>
+
+    <script>
+        const conversionTypes = [
+            { id: 'camelCase', description: 'camelCase', remark: '小驼峰', shortcut: 'Alt+1' },
+            { id: 'pascalCase', description: 'PascalCase', remark: '大驼峰', shortcut: 'Alt+2' },
+            { id: 'constantCase', description: 'CONSTANT_CASE', remark: '常量', shortcut: 'Alt+3' },
+            { id: 'snakeCase', description: 'snake_case', remark: '下划线(小)', shortcut: 'Alt+4' },
+            { id: 'snakeCaseUpper', description: 'SNAKE_CASE', remark: '下划线(大)', shortcut: 'Alt+5' },
+            { id: 'titleCase', description: 'Title Case', remark: '分词(大)', shortcut: 'Alt+6' },
+            { id: 'lowerWords', description: 'lowercase words', remark: '分词(小)', shortcut: 'Alt+7' },
+            { id: 'kebabCase', description: 'kebab-case', remark: '连字符', shortcut: 'Alt+8' }
+        ];
+
+        function generateConversionList() {
+            const output = document.getElementById('output');
+            output.innerHTML = ''; // Clear existing content
+
+            conversionTypes.forEach(type => {
+                const listItem = document.createElement('li');
+                listItem.className = 'conversion-item';
+                listItem.innerHTML = `
+                    <div class="conversion-name">
+                        <div class="conversion-description">${type.description}</div>
+                        <div class="conversion-remark">${type.remark}</div>
+                    </div>
+                    <span id="${type.id}" class="conversion-result" onclick="copyToClipboard(this.innerText)"></span>
+                    <div class="copy-section">
+                        <button class="copy-button" onclick="copyToClipboard(document.getElementById('${type.id}').innerText)">Copy</button>
+                        <div class="shortcut">${type.shortcut}</div>
+                    </div>
+                `;
+                output.appendChild(listItem);
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', generateConversionList);
+
+        function convertVariable() {
+            let input = document.getElementById('inputVariable').value;
+            if (input === input.toUpperCase()) {
+                input = input.toLowerCase();
+            }
+            const words = input.match(/[A-Za-z][a-z]*/g) || [];
+
+            const toCamelCase = words.map((word, index) => index === 0 ? word.toLowerCase() : capitalize(word)).join('');
+            const toPascalCase = words.map(capitalize).join('');
+            const toConstantCase = words.map(word => word.toUpperCase()).join('_');
+            const toSnakeCase = words.map(word => word.toLowerCase()).join('_');
+            const toSnakeCaseUpper = words.map(word => word.toUpperCase()).join('_');
+            const toTitleCase = words.map(capitalize).join(' ');
+            const toLowerWords = words.map(word => word.toLowerCase()).join(' ');
+            const toKebabCase = words.map(word => word.toLowerCase()).join('-');
+
+            const result = {
+                camelCase: toCamelCase,
+                pascalCase: toPascalCase,
+                constantCase: toConstantCase,
+                snakeCase: toSnakeCase,
+                snakeCaseUpper: toSnakeCaseUpper,
+                titleCase: toTitleCase,
+                lowerWords: toLowerWords,
+                kebabCase: toKebabCase
+            };
+
+            for (const [key, value] of Object.entries(result)) {
+                document.getElementById(key).innerText = value;
+            }
+        }
+
+
+        function copyToClipboard(text) {
+            if (typeof utools !== 'undefined' && utools.copyText) {
+                utools.copyText(text);
+                showToast("Copy: " + text);
+            } else {
+                console.error('uTools API is not available.');
+            }
+        }
+
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            toast.className = 'toast show';
+            toast.innerText = message;
+            setTimeout(() => { toast.className = toast.className.replace('show', ''); }, 3000);
+        }
+
+        function capitalize(word) {
+            return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+        }
+
+        document.addEventListener('keydown', (event) => {
+            if (event.altKey) {
+                for (const type of conversionTypes) {
+                    if ("Alt+"+event.key === type.shortcut) {
+                        copyToClipboard(document.getElementById(type.id).innerText);
+                        break;
+                    }
+                }
+            }
+        });
+
+        utools.onPluginEnter(({ code, type, payload }) => {
+            if (code) {
+                document.getElementById('inputVariable').value = payload;
+                convertVariable(); // Automatically convert the input
+            }
+        });
+    </script>
+</body>
+</html> 

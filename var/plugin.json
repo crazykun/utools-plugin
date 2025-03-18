@@ -1,0 +1,22 @@
+{
+    "logo": "logo.png",
+    "main": "index.html",
+    "features": [
+        {
+            "code": "var",
+            "explain": "变量转换",
+            "cmds": [
+                "var",
+                "变量",
+                "to",
+                "转换",
+                {
+                    "type": "over",
+                    "label": "变量变换",
+                    "minLength": 1,
+                    "maxLength": 500
+                }
+            ]
+        }
+    ]
+}
