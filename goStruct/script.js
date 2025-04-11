@@ -15,46 +15,108 @@ function convert() {
   document.getElementById('outputText').value = output;
 }
 
-function convertJsonToGoStruct(json, jsonTag, xmlTag, gormTag) {
+// 在 getStructName 函数中添加唯一后缀
+function getStructName(key, level) {
+  const tail = level > 2 ? `${level-2}` : '';
+  return `${capitalizeFirstLetter(key)}${tail}`;
+}
+
+function getTypeAndProcess(value, key, level) { // 新增参数 key 和 level
+  let goType = 'interface{}';
+  let needsRecursive = false;
+
+  const type = typeof value;
+  switch (type) {
+    case 'string':
+      goType = 'string';
+      break;
+    case 'number':
+      goType = Number.isInteger(value) ? 'int64' : 'float64';
+      break;
+    case 'boolean':
+      goType = 'bool';
+      break;
+    case 'object':
+      if (value === null) {
+        goType = 'interface{}';
+      } else if (Array.isArray(value)) {
+        goType = '[]interface{}';
+      } else {
+        // 根据字段名和层级生成结构体名称
+        const structName = getStructName(key, level + 1); // 下一层级
+        goType = structName;
+        needsRecursive = true;
+      }
+      break;
+  }
+
+  return { goType, needsRecursive };
+}
+
+function convertJsonToGoStruct(
+  json,
+  jsonTag,
+  xmlTag,
+  gormTag,
+  level = 1,
+  path = ''
+) {
   try {
     const jsonObject = JSON.parse(json);
-    let struct = 'type GoStruct struct {\n';
+    const structDefinitions = [];
+    let mainStructName = level === 1 ? 'GoStruct' : getStructName(path, level);
+    let mainStruct = `type ${mainStructName} struct {\n`;
 
     for (const key in jsonObject) {
       if (jsonObject.hasOwnProperty(key)) {
-        const type = typeof jsonObject[key];
-        let goType = 'interface{}';
+        const value = jsonObject[key];
+        const childKey = key
+        .split('_')
+        .map(word => capitalizeFirstLetter(word))
+        .join('');
+        const currentPath = path ? `${path}${childKey}` : childKey; // 构建当前路径
+        // 传递路径参数
+        let { goType, needsRecursive } = getTypeAndProcess(
+          value,
+          childKey,
+          level,
+          currentPath
+        );
 
-        switch (type) {
-          case 'string':
-            goType = 'string';
-            break;
-          case 'number':
-            goType = Number.isInteger(jsonObject[key]) ? 'int64' : 'float64';
-            break;
-          case 'boolean':
-            goType = 'bool';
-            break;
-          case 'object':
-            goType = Array.isArray(jsonObject[key]) ? '[]interface{}' : 'struct{}';
-            break;
+        if (needsRecursive) {
+          const nestedStructName = getStructName(currentPath, level + 1);
+          const nestedJson = JSON.stringify(value);
+          const nestedStruct = convertJsonToGoStruct(
+            nestedJson,
+            jsonTag,
+            xmlTag,
+            gormTag,
+            level + 1,
+            currentPath // 传递完整路径
+          );
+          structDefinitions.push(nestedStruct);
+          goType = nestedStructName; // 使用生成的结构体名称
         }
 
+        // 生成字段标签
         let tags = '';
-        if (jsonTag) tags += ` json:\"${key}\"`;
-        if (xmlTag) tags += ` xml:\"${key}\"`;
-        if (gormTag) tags += ` gorm:\"column:${key}\"`;
+        if (jsonTag) tags += ` json:"${key}"`;
+        if (xmlTag) tags += ` xml:"${key}"`;
+        if (gormTag) tags += ` gorm:"column:${key}"`;
 
-        struct += `  ${capitalizeFirstLetter(key)} ${goType} \`${tags.trim()}\`\n`;
+        mainStruct += `  ${capitalizeFirstLetter(childKey)} ${goType} \`${tags.trim()}\`\n`;
       }
     }
 
-    struct += '}\n';
-    return struct;
+    mainStruct += '}\n';
+    structDefinitions.push(mainStruct);
+    return structDefinitions.join('\n');
   } catch (error) {
+    console.error('Invalid JSON input:', error);
     return '// Invalid JSON input\n';
   }
 }
+
 
 function convertSqlToGoStruct(sql, jsonTag, xmlTag, gormTag) {
   const lines = sql.split('\n');
@@ -133,10 +195,10 @@ function copyToClipboard() {
   const outputText = document.getElementById('outputText');
   const text = outputText.value;
   if (typeof utools !== 'undefined' && utools.copyText) {
-      utools.copyText(text);
-      showToast("Copy: Success");
+    utools.copyText(text);
+    showToast("Copy: Success");
   } else {
-      console.error('uTools API is not available.');
+    console.error('uTools API is not available.');
   }
 }
 
