@@ -59,13 +59,20 @@ function convertJsonToGoStruct(json, jsonTag, xmlTag, gormTag) {
 function convertSqlToGoStruct(sql, jsonTag, xmlTag, gormTag) {
   const lines = sql.split('\n');
   let struct = 'type GoStruct struct {\n';
+  let tableName = '';
+  let capitalizeTableName = '';
 
   lines.forEach(line => {
     // 从sql ddl语句里面读取tale名
     const tableNameMatch = line.match(/CREATE TABLE `(\w+)`/);
     if (tableNameMatch) {
-      const tableName = tableNameMatch[1];
-      struct = `type ${capitalizeFirstLetter(tableName)} struct {\n`;
+      tableName = tableNameMatch[1];
+      // 将表名转换为大写字母开头的驼峰命名法
+      capitalizeTableName = tableName
+        .split('_')
+        .map(word => capitalizeFirstLetter(word))
+        .join('');
+      struct = `type ${capitalizeFirstLetter(capitalizeTableName)} struct {\n`;
     }
     // 从sql ddl语句里面读取字段名和类型
     const match = line.match(/`(\w+)`\s+(\w+)/);
@@ -109,9 +116,33 @@ function convertSqlToGoStruct(sql, jsonTag, xmlTag, gormTag) {
   });
 
   struct += '}\n';
+
+  // 添加表名 // TableName 表名称
+  struct += `\n\nfunc (*${capitalizeTableName}) TableName() string {
+    return "${tableName}"
+  }`;
+
   return struct;
 }
 
 function capitalizeFirstLetter(string) {
   return string.charAt(0).toUpperCase() + string.slice(1);
+}
+
+function copyToClipboard() {
+  const outputText = document.getElementById('outputText');
+  const text = outputText.value;
+  if (typeof utools !== 'undefined' && utools.copyText) {
+      utools.copyText(text);
+      showToast("Copy: Success");
+  } else {
+      console.error('uTools API is not available.');
+  }
+}
+
+function showToast(message) {
+  const toast = document.getElementById('toast');
+  toast.className = 'toast show';
+  toast.innerText = message;
+  setTimeout(() => { toast.className = toast.className.replace('show', ''); }, 3000);
 }

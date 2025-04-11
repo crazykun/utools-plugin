@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html>
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -15,6 +16,7 @@
       height: 100vh;
       background-color: #e9ecef;
     }
+
     #container {
       display: flex;
       width: 100%;
@@ -22,25 +24,27 @@
       overflow: hidden;
       background-color: #fff;
     }
-    #inputPanel, #outputPanel {
+
+    #inputPanel,
+    #outputPanel {
       flex: 1;
       padding: 20px;
       display: flex;
       flex-direction: column;
     }
+
     #inputPanel {
       border-right: 1px solid #dee2e6;
     }
-    #inputPanel div, #outputPanel div {
+
+    #inputPanel div,
+    #outputPanel div {
       display: flex;
       align-items: center;
       margin-bottom: 10px;
       height: 40px;
     }
-    h2 {
-      margin-top: 0;
-      color: #495057;
-    }
+
     textarea {
       width: 100%;
       flex-grow: 1;
@@ -52,11 +56,13 @@
       box-sizing: border-box;
       background-color: #f8f9fa;
     }
+
     label {
       margin-right: 10px;
       font-size: 14px;
       color: #495057;
     }
+
     button {
       margin-left: 10px;
       padding: 10px 20px;
@@ -68,28 +74,109 @@
       font-size: 14px;
       transition: background-color 0.3s ease;
     }
+
     button:hover {
       background-color: #0056b3;
     }
+
+    .copy {
+      display: flex;
+      /* 启用 Flex 布局 */
+      justify-content: flex-end;
+      /* 右对齐 */
+      margin-bottom: 10px;
+    }
+
+    .toast {
+      visibility: hidden;
+      min-width: 250px;
+      margin-left: -125px;
+      background-color: #333;
+      color: #fff;
+      text-align: center;
+      border-radius: 5px;
+      padding: 10px;
+      position: fixed;
+      z-index: 1;
+      left: 50%;
+      bottom: 30px;
+      font-size: 17px;
+    }
+
+    .toast.show {
+      visibility: visible;
+      -webkit-animation: fadein 0.5s, fadeout 0.5s 2.5s;
+      animation: fadein 0.5s, fadeout 0.5s 2.5s;
+    }
+
+    @-webkit-keyframes fadein {
+      from {
+        bottom: 0;
+        opacity: 0;
+      }
+
+      to {
+        bottom: 30px;
+        opacity: 1;
+      }
+    }
+
+    @keyframes fadein {
+      from {
+        bottom: 0;
+        opacity: 0;
+      }
+
+      to {
+        bottom: 30px;
+        opacity: 1;
+      }
+    }
+
+    @-webkit-keyframes fadeout {
+      from {
+        bottom: 30px;
+        opacity: 1;
+      }
+
+      to {
+        bottom: 0;
+        opacity: 0;
+      }
+    }
+
+    @keyframes fadeout {
+      from {
+        bottom: 30px;
+        opacity: 1;
+      }
+
+      to {
+        bottom: 0;
+        opacity: 0;
+      }
+    }
   </style>
 </head>
+
 <body>
   <div id="container">
     <div id="inputPanel">
-      <h2>Input</h2>
       <div>
         <label><input type="checkbox" id="jsonTag" checked> JSON</label>
         <label><input type="checkbox" id="xmlTag"> XML</label>
         <label><input type="checkbox" id="gormTag"> GORM</label>
         <button onclick="convert()">转换</button>
-      </div>      
+      </div>
       <textarea id="inputText" placeholder="Enter JSON or SQL DDL..."></textarea>
     </div>
     <div id="outputPanel">
-      <h2>Output</h2>
+      <div class="copy"><button onclick="copyToClipboard()">复制</button></div>
       <textarea id="outputText"></textarea>
     </div>
   </div>
+  <div id="toast" class="toast">Copied to clipboard!</div>
   <script src="script.js"></script>
 </body>
+
 </html>
