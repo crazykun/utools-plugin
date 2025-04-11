@@ -30,7 +30,7 @@ function convertJsonToGoStruct(json, jsonTag, xmlTag, gormTag) {
             goType = 'string';
             break;
           case 'number':
-            goType = Number.isInteger(jsonObject[key]) ? 'int' : 'float64';
+            goType = Number.isInteger(jsonObject[key]) ? 'int64' : 'float64';
             break;
           case 'boolean':
             goType = 'bool';
@@ -80,7 +80,7 @@ function convertSqlToGoStruct(sql, jsonTag, xmlTag, gormTag) {
           break;
         case 'int':
         case 'integer':
-          goType = 'int';
+          goType = 'int64';
           break;
         case 'bigint':
           goType = 'int64';
