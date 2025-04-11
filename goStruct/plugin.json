@@ -1,0 +1,17 @@
+{
+    "logo": "logo.png",
+    "main": "index.html",
+    "features": [
+        {
+            "code": "go struct",
+            "cmds": [
+                "sql",
+                "json",
+                "struct",
+                "go",
+                "结构体"
+            ],
+            "explain": "将JSON或SQL的DDL语句转换为Go struct。"
+        }
+    ]
+}

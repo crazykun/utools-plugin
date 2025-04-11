@@ -11,6 +11,7 @@
 | **加密解密** | 多算法加密解密测试工具 | MD5/SHA1/SHA256/RIPEMD160/AES/DES/RC4 |
 | **IP查询** | 实时IP归属地查询 | 地理位置/运营商/地区编码 |
 | **变量名生成** | 代码变量名智能生成 | 支持驼峰/下划线等多种命名规范 |
+| **GoStruct** | Go语言结构体转换工具 | JSON/YAML/XML转Go结构体定义 |
 
 ## 使用指南
 
@@ -40,10 +41,12 @@
 | 加密解密 | ![加密解密界面](https://raw.githubusercontent.com/crazykun/utools-plugin/main/img/encrpt.png) |
 | IP查询 | ![IP查询界面](https://raw.githubusercontent.com/crazykun/utools-plugin/main/img/ip.png) |
 | 变量生成 | ![变量生成界面](https://raw.githubusercontent.com/crazykun/utools-plugin/main/img/var.png) |
+| GoStuct | ![GoStuct](https://raw.githubusercontent.com/crazykun/utools-plugin/main/img/gostruct.jpg) |
 
 ## 快捷入口
 
 > 提示：可通过以下链接快速跳转（需UTools客户端支持）
+
 [加密解密](utools://加密解密)  
 [IP查询](utools://ip)  
 [变量生成](utools://var)
