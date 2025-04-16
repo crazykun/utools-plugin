@@ -139,7 +139,7 @@ function convertSqlToGoStruct(sql, jsonTag, xmlTag, gormTag) {
     // 从sql ddl语句里面读取字段名和类型
     const match = line.match(/`(\w+)`\s+(\w+)/);
     if (match) {
-      const [, columnName, sqlType] = match;
+      const [, name, sqlType] = match;
       let goType = 'interface{}';
 
       switch (sqlType.toLowerCase()) {
@@ -147,15 +147,12 @@ function convertSqlToGoStruct(sql, jsonTag, xmlTag, gormTag) {
         case 'text':
           goType = 'string';
           break;
-        case 'int':
-        case 'integer':
-          goType = 'int64';
-          break;
-        case 'bigint':
+        case 'int', 'bigint', 'smallint', 'tinyint', 'mediumint':
           goType = 'int64';
           break;
         case 'float':
         case 'double':
+        case 'decimal':
           goType = 'float64';
           break;
         case 'boolean':
@@ -169,11 +166,12 @@ function convertSqlToGoStruct(sql, jsonTag, xmlTag, gormTag) {
       }
 
       let tags = '';
-      if (jsonTag) tags += ` json:\"${columnName}\"`;
-      if (xmlTag) tags += ` xml:\"${columnName}\"`;
-      if (gormTag) tags += ` gorm:\"column:${columnName}\"`;
-
-      struct += `  ${capitalizeFirstLetter(columnName)} ${goType} \`${tags.trim()}\`\n`;
+      if (jsonTag) tags += ` json:\"${name}\"`;
+      if (xmlTag) tags += ` xml:\"${name}\"`;
+      if (gormTag) tags += ` gorm:\"column:${name}\"`;
+      
+      colunmName = name.split('_').map(word => capitalizeFirstLetter(word)).join('');
+      struct += `  ${colunmName} ${goType} \`${tags.trim()}\`\n`;
     }
   });
 
