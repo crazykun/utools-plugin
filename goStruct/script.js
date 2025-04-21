@@ -147,7 +147,11 @@ function convertSqlToGoStruct(sql, jsonTag, xmlTag, gormTag) {
         case 'text':
           goType = 'string';
           break;
-        case 'int', 'bigint', 'smallint', 'tinyint', 'mediumint':
+        case 'int':
+        case 'bigint':
+        case 'smallint':
+        case 'tinyint':
+        case 'mediumint':
           goType = 'int64';
           break;
         case 'float':
