@@ -138,6 +138,8 @@ function convertSqlToGoStruct(sql, jsonTag, xmlTag, gormTag) {
     }
     // 从sql ddl语句里面读取字段名和类型
     const match = line.match(/`(\w+)`\s+(\w+)/);
+    // 提取备注COMMENT
+    const commentMatch = line.match(/COMMENT\s+'(.*)'/);
     if (match) {
       const [, name, sqlType] = match;
       let goType = 'interface{}';
@@ -173,6 +175,7 @@ function convertSqlToGoStruct(sql, jsonTag, xmlTag, gormTag) {
       if (jsonTag) tags += ` json:\"${name}\"`;
       if (xmlTag) tags += ` xml:\"${name}\"`;
       if (gormTag) tags += ` gorm:\"column:${name}\"`;
+      tags += ` comment:\"${commentMatch ? commentMatch[1] : ''}\"`;
       
       colunmName = name.split('_').map(word => capitalizeFirstLetter(word)).join('');
       struct += `  ${colunmName} ${goType} \`${tags.trim()}\`\n`;
