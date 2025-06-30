@@ -127,16 +127,7 @@
                     }
 
                     // 发起第二个Ajax请求并等待其完成
-                    const secondResponse = await new Promise((resolve, reject) => {
-                        $.ajax({
-                            url: 'https://qifu.baidu.com/ip/geo/v1/district?ip=' + ip,
-                            method: 'GET',
-                            success: function (data) {
-                                resolve(data);
-                            },
-                            error: reject
-                        });
-                    });
+                    const secondResponse = await window.services.baidu(ip);
 
                     if (!secondResponse.error) {
                         resultSucc++;
