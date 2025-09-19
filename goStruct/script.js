@@ -213,3 +213,10 @@ function showToast(message) {
   toast.innerText = message;
   setTimeout(() => { toast.className = toast.className.replace('show', ''); }, 3000);
 }
+
+utools.onPluginEnter(({ code, type, payload }) => {
+  if (code) {
+    document.getElementById('inputText').value = payload;
+    convert();
+  }
+});
