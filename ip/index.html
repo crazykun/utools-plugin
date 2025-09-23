@@ -26,6 +26,7 @@
             text-align: center;
             padding: 10px 0;
         }
+
         .layui-footer a {
             color: #aaa;
         }
@@ -84,108 +85,179 @@
                 , form = layui.form
                 , $ = layui.$;
 
+            // 全局IP变量
+            var globalIP = '';
 
             $('#queryBtn').click(async function () {
                 var ip = $('#ipInput').val();
-                var resultSucc = 0
                 $('#resultBody').html("");
 
-                try {
-                    // 等待第一个Ajax请求完成
-                    const firstResponse = await new Promise((resolve, reject) => {
+                // 如果输入框中有IP，则使用输入的IP，否则使用全局IP
+                if (ip) {
+                    globalIP = ip;
+                } else {
+                    ip = globalIP;
+                }
+
+                if (!ip) {
+                    layer.msg('请输入IP地址');
+                    return;
+                }
+
+                // 创建带超时控制的请求函数
+                function createTimeoutRequest(promise, timeout = 1000) {
+                    return Promise.race([
+                        promise,
+                        new Promise((resolve) => 
+                            setTimeout(() => resolve({source: null, data: null, error: true}), timeout)
+                        )
+                    ]);
+                }
+
+                // 并行发起所有查询请求，每个请求设置1秒超时
+                const requests = [
+                    // ipapi.co 查询
+                    createTimeoutRequest(new Promise((resolve) => {
                         $.ajax({
                             url: 'https://ipapi.co/' + ip + '/json/',
                             method: 'GET',
                             success: function (data) {
-                                resolve(data);
+                                resolve({source: 'ipapi', data: data, error: false});
                             },
-                            error: reject
+                            error: function (error) {
+                                resolve({source: 'ipapi', data: null, error: true});
+                            }
                         });
-                    });
+                    })),
+                    // 百度查询
+                    createTimeoutRequest(window.services.baidu(ip).then(
+                        (data) => ({source: '百度', data: data, error: false})
+                    ).catch(
+                        (error) => ({source: '百度', data: null, error: true})
+                    )),
+                    // qqzeng 查询
+                    createTimeoutRequest(window.services.qqzeng(ip).then(
+                        (data) => ({source: 'qqzeng-ip', data: data, error: false})
+                    ).catch(
+                        (error) => ({source: 'qqzeng-ip', data: null, error: true})
+                    ))
+                ];
 
-                    if (!firstResponse.error) {
-                        resultSucc++;
-                        resultBody =
-                            '<tr>' +
-                            '<td>ipapi</td>' +
-                            '<td>' + firstResponse.ip + '</td>' +
-                            '<td>' + firstResponse.country_name + '</td>' +
-                            '<td>' + (firstResponse.region || 'N/A') + '</td>' +
-                            '<td>' + (firstResponse.city || 'N/A') + '</td>' +
-                            '<td>' + (firstResponse.org || 'N/A') + '</td>' +
-                            '</tr>'
-                            ;
-                        $('#resultBody').html(resultBody);
-                        if (!ip) {
-                            ip = firstResponse.ip;
-                            $('#ipInput').val(firstResponse.ip);
+                // 等待所有请求完成
+                const results = await Promise.all(requests);
+                
+                // 处理结果并更新表格
+                let resultBody = '';
+                results.forEach(result => {
+                    if (!result.error && result.data && result.source) {
+                        try {
+                            if (result.source === 'ipapi' && !result.data.error) {
+                                resultBody +=
+                                    '<tr>' +
+                                    '<td>ipapi</td>' +
+                                    '<td>' + (result.data.ip || ip) + '</td>' +
+                                    '<td>' + (result.data.country_name || 'N/A') + '</td>' +
+                                    '<td>' + (result.data.region || 'N/A') + '</td>' +
+                                    '<td>' + (result.data.city || 'N/A') + '</td>' +
+                                    '<td>' + (result.data.org || 'N/A') + '</td>' +
+                                    '</tr>';
+                            } else if (result.source === '百度' && !result.data.error) {
+                                resultBody +=
+                                    '<tr>' +
+                                    '<td>百度</td>' +
+                                    '<td>' + ip + '</td>' +
+                                    '<td>' + (result.data.data.country || 'N/A') + '</td>' +
+                                    '<td>' + (result.data.data.prov || 'N/A') + '</td>' +
+                                    '<td>' + (result.data.data.city || 'N/A') + '</td>' +
+                                    '<td>' + (result.data.data.isp || 'N/A') + '</td>' +
+                                    '</tr>';
+                            } else if (result.source === 'qqzeng-ip' && !result.data.error && result.data.code == 0) {
+                                resultBody +=
+                                    '<tr>' +
+                                    '<td>qqzeng-ip</td>' +
+                                    '<td>' + (result.data.data.ip || ip) + '</td>' +
+                                    '<td>' + (result.data.data.country || 'N/A') + '</td>' +
+                                    '<td>' + (result.data.data.province || 'N/A') + '</td>' +
+                                    '<td>' + (result.data.data.city || 'N/A') + '</td>' +
+                                    '<td>' + (result.data.data.isp || 'N/A') + '</td>' +
+                                    '</tr>';
+                            }
+                        } catch (e) {
+                            console.error('处理' + result.source + '数据时出错:', e);
                         }
                     }
+                });
 
-                    if (!ip) {
-                        if (resultSucc == 0) {
-                            layer.msg('请输入IP地址');
-                        }
-                        return;
-                    }
-
-                    // 发起第二个Ajax请求并等待其完成
-                    try {
-                        const secondResponse = await window.services.baidu(ip);
-                        console.log('secondResponse', secondResponse);
-                        if (!secondResponse.error) {
-                            resultSucc++;
-                            resultBody +=
-                                '<tr>' +
-                                '<td>百度</td>' +
-                                '<td>' + ip + '</td>' +
-                                '<td>' + secondResponse.data.country + '</td>' +
-                                '<td>' + (secondResponse.data.prov || 'N/A') + '</td>' +
-                                '<td>' + (secondResponse.data.city || 'N/A') + '</td>' +
-                                '<td>' + (secondResponse.data.isp || 'N/A') + '</td>' +
-                                '</tr>'
-                                ;
-                            $('#resultBody').html(resultBody);
-                        }
-                    } catch (error) {
-                        console.error('百度API请求出错', error);
-                        // 即使出错也继续执行
-                    }
-
-                     // 发起第三个Ajax请求并等待其完成
-                    try {
-                        const thirdResponse = await window.services.qqzeng(ip);
-                        console.log('thirdResponse', thirdResponse);
-                        if (!thirdResponse.error && thirdResponse.code == 0) {
-                            resultSucc++;
-                            resultBody +=
-                                '<tr>' +
-                                '<td>qqzeng-ip</td>' +
-                                '<td>' + thirdResponse.data.ip + '</td>' +
-                                '<td>' + thirdResponse.data.country + '</td>' +
-                                '<td>' + (thirdResponse.data.province || 'N/A') + '</td>' +
-                                '<td>' + (thirdResponse.data.city || 'N/A') + '</td>' +
-                                '<td>' + (thirdResponse.data.isp || 'N/A') + '</td>' +
-                                '</tr>'
-                                ;
-                            $('#resultBody').html(resultBody);
-                        }
-                    } catch (error) {
-                        console.error('QQZeng API请求出错', error);
-                        // 即使出错也继续执行
-                    }
-                } catch (error) {
-                    console.error('请求出错', error);
-                }
+                $('#resultBody').html(resultBody);
             });
 
+            async function getMyIP() {
+                try {
+                    // 使用多个IP查询API作为备选
+                    const apis = [
+                        'https://api.ipify.org?format=json',
+                        'https://httpbin.org/ip',
+                        'https://api.myip.com',
+                        'https://ipinfo.io/json'
+                    ];
+
+                    for (const apiUrl of apis) {
+                        try {
+                            const response = await new Promise((resolve, reject) => {
+                                $.ajax({
+                                    url: apiUrl,
+                                    method: 'GET',
+                                    success: function (data) {
+                                        resolve(data);
+                                    },
+                                    error: reject
+                                });
+                            });
+                            // 根据不同API的返回格式解析IP
+                            let ip;
+                            if (apiUrl.includes('ipify')) {
+                                ip = response.ip;
+                            } else if (apiUrl.includes('httpbin')) {
+                                ip = response.origin;
+                            } else if (apiUrl.includes('myip')) {
+                                ip = response.ip;
+                            } else if (apiUrl.includes('ipinfo')) {
+                                ip = response.ip;
+                            }
+
+                            if (ip) {
+                                return ip;
+                            }
+                        } catch (error) {
+                            console.log(`API ${apiUrl} 请求失败，尝试下一个`);
+                            console.error(error);
+                            continue;
+                        }
+                    }
+
+                    throw new Error('所有IP查询API都失败了');
+                } catch (error) {
+                    return "";
+                }
+            }
 
             // 从utools中获取数据
-            utools.onPluginEnter(({code, type, payload, option }) => {
-                console.log('onPluginEnter', code, type, payload, option);
+            utools.onPluginEnter(async ({code, type, payload, option, from}) => {
+                console.log('onPluginEnter', code, type, payload, option, from);
+                
+                // 获取本地IP
                 if (type == 'regex') {
                     $('#ipInput').val(payload);
+                    globalIP = payload;
+                } else {
+                    const ip = await getMyIP();
+                    if (ip) {
+                        $('#ipInput').val(ip);
+                        globalIP = ip;
+                        console.log('自动获取到IP:', ip);
+                    }
                 }
+
                 $('#queryBtn').click();
             })
 
