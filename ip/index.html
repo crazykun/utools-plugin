@@ -127,21 +127,49 @@
                     }
 
                     // 发起第二个Ajax请求并等待其完成
-                    const secondResponse = await window.services.baidu(ip);
+                    try {
+                        const secondResponse = await window.services.baidu(ip);
+                        console.log('secondResponse', secondResponse);
+                        if (!secondResponse.error) {
+                            resultSucc++;
+                            resultBody +=
+                                '<tr>' +
+                                '<td>百度</td>' +
+                                '<td>' + ip + '</td>' +
+                                '<td>' + secondResponse.data.country + '</td>' +
+                                '<td>' + (secondResponse.data.prov || 'N/A') + '</td>' +
+                                '<td>' + (secondResponse.data.city || 'N/A') + '</td>' +
+                                '<td>' + (secondResponse.data.isp || 'N/A') + '</td>' +
+                                '</tr>'
+                                ;
+                            $('#resultBody').html(resultBody);
+                        }
+                    } catch (error) {
+                        console.error('百度API请求出错', error);
+                        // 即使出错也继续执行
+                    }
 
-                    if (!secondResponse.error) {
-                        resultSucc++;
-                        resultBody +=
-                            '<tr>' +
-                            '<td>百度</td>' +
-                            '<td>' + secondResponse.ip + '</td>' +
-                            '<td>' + secondResponse.data.country + '</td>' +
-                            '<td>' + (secondResponse.data.prov || 'N/A') + '</td>' +
-                            '<td>' + (secondResponse.data.city || 'N/A') + '</td>' +
-                            '<td>' + (secondResponse.data.isp || 'N/A') + '</td>' +
-                            '</tr>'
-                            ;
-                        $('#resultBody').html(resultBody);
+                     // 发起第三个Ajax请求并等待其完成
+                    try {
+                        const thirdResponse = await window.services.qqzeng(ip);
+                        console.log('thirdResponse', thirdResponse);
+                        if (!thirdResponse.error && thirdResponse.code == 0) {
+                            resultSucc++;
+                            resultBody +=
+                                '<tr>' +
+                                '<td>qqzeng-ip</td>' +
+                                '<td>' + thirdResponse.data.ip + '</td>' +
+                                '<td>' + thirdResponse.data.country + '</td>' +
+                                '<td>' + (thirdResponse.data.province || 'N/A') + '</td>' +
+                                '<td>' + (thirdResponse.data.city || 'N/A') + '</td>' +
+                                '<td>' + (thirdResponse.data.isp || 'N/A') + '</td>' +
+                                '</tr>'
+                                ;
+                            $('#resultBody').html(resultBody);
+                        }
+                    } catch (error) {
+                        console.error('QQZeng API请求出错', error);
+                        // 即使出错也继续执行
                     }
                 } catch (error) {
                     console.error('请求出错', error);
