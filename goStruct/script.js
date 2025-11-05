@@ -13,11 +13,12 @@ function convert() {
   }
 
   document.getElementById('outputText').value = output;
+  return output;
 }
 
 // 在 getStructName 函数中添加唯一后缀
 function getStructName(key, level) {
-  const tail = level > 2 ? `${level-2}` : '';
+  const tail = level > 2 ? `${level - 2}` : '';
   return `${capitalizeFirstLetter(key)}${tail}`;
 }
 
@@ -71,9 +72,9 @@ function convertJsonToGoStruct(
       if (jsonObject.hasOwnProperty(key)) {
         const value = jsonObject[key];
         const childKey = key
-        .split('_')
-        .map(word => capitalizeFirstLetter(word))
-        .join('');
+          .split('_')
+          .map(word => capitalizeFirstLetter(word))
+          .join('');
         const currentPath = path ? `${path}${childKey}` : childKey; // 构建当前路径
         // 传递路径参数
         let { goType, needsRecursive } = getTypeAndProcess(
@@ -140,9 +141,13 @@ function convertSqlToGoStruct(sql, jsonTag, xmlTag, gormTag) {
     const match = line.match(/`(\w+)`\s+(\w+)/);
     // 提取备注COMMENT
     const commentMatch = line.match(/COMMENT\s+'(.*)'/);
+    // 检查是否有当前时间默认值
+    const hasCurrentTimeDefault = /DEFAULT\s+(CURRENT_TIMESTAMP|NOW\(\)|CURRENT_TIME)/i.test(line);
+
     if (match) {
       const [, name, sqlType] = match;
       let goType = 'interface{}';
+      let isTimeField = false;
 
       switch (sqlType.toLowerCase()) {
         case 'varchar':
@@ -167,6 +172,7 @@ function convertSqlToGoStruct(sql, jsonTag, xmlTag, gormTag) {
         case 'datetime':
         case 'timestamp':
           goType = 'time.Time';
+          isTimeField = true;
           break;
         // Add more SQL to Go type mappings as needed
       }
@@ -174,9 +180,16 @@ function convertSqlToGoStruct(sql, jsonTag, xmlTag, gormTag) {
       let tags = '';
       if (jsonTag) tags += ` json:\"${name}\"`;
       if (xmlTag) tags += ` xml:\"${name}\"`;
-      if (gormTag) tags += ` gorm:\"column:${name}\"`;
+      if (gormTag) {
+        let gormTags = `column:${name}`;
+        // 如果是时间字段且有当前时间默认值，添加autoCreateTime标签
+        if (isTimeField && hasCurrentTimeDefault) {
+          gormTags += ';autoCreateTime';
+        }
+        tags += ` gorm:\"${gormTags}\"`;
+      }
       tags += ` comment:\"${commentMatch ? commentMatch[1] : ''}\"`;
-      
+
       colunmName = name.split('_').map(word => capitalizeFirstLetter(word)).join('');
       struct += `  ${colunmName} ${goType} \`${tags.trim()}\`\n`;
     }
@@ -219,4 +232,27 @@ utools.onPluginEnter(({ code, type, payload }) => {
     document.getElementById('inputText').value = payload;
     convert();
   }
+});
+
+// 添加自动转换功能
+let convertTimeout;
+const inputTextArea = document.getElementById('inputText');
+
+inputTextArea.addEventListener('input', function () {
+  // 清除之前的定时器
+  if (convertTimeout) {
+    clearTimeout(convertTimeout);
+  }
+
+  // 设置新的定时器，延迟500ms执行自动转换
+  convertTimeout = setTimeout(function () {
+    const inputText = inputTextArea.value.trim();
+    if (inputText) {
+      const result = convert();
+      // 如果转换成功且有输出，则自动复制
+      if (result && !result.startsWith('// Invalid JSON input')) {
+        copyToClipboard();
+      }
+    }
+  }, 500);
 });
