@@ -143,6 +143,8 @@ function convertSqlToGoStruct(sql, jsonTag, xmlTag, gormTag) {
     const commentMatch = line.match(/COMMENT\s+'(.*)'/);
     // 检查是否有当前时间默认值
     const hasCurrentTimeDefault = /DEFAULT\s+(CURRENT_TIMESTAMP|NOW\(\)|CURRENT_TIME)/i.test(line);
+    // 检查是否有ON UPDATE CURRENT_TIMESTAMP
+    const hasOnUpdateCurrentTime = /ON\s+UPDATE\s+(CURRENT_TIMESTAMP|NOW\(\)|CURRENT_TIME)/i.test(line);
 
     if (match) {
       const [, name, sqlType] = match;
@@ -185,6 +187,10 @@ function convertSqlToGoStruct(sql, jsonTag, xmlTag, gormTag) {
         // 如果是时间字段且有当前时间默认值，添加autoCreateTime标签
         if (isTimeField && hasCurrentTimeDefault) {
           gormTags += ';autoCreateTime';
+        }
+        // 如果是时间字段且有ON UPDATE CURRENT_TIMESTAMP，添加autoUpdateTime标签
+        if (isTimeField && hasOnUpdateCurrentTime) {
+          gormTags += ';autoUpdateTime';
         }
         tags += ` gorm:\"${gormTags}\"`;
       }
