@@ -184,13 +184,13 @@ function convertSqlToGoStruct(sql, jsonTag, xmlTag, gormTag) {
       if (xmlTag) tags += ` xml:\"${name}\"`;
       if (gormTag) {
         let gormTags = `column:${name}`;
-        // 如果是时间字段且有当前时间默认值，添加autoCreateTime标签
-        if (isTimeField && hasCurrentTimeDefault) {
-          gormTags += ';autoCreateTime';
-        }
+        
         // 如果是时间字段且有ON UPDATE CURRENT_TIMESTAMP，添加autoUpdateTime标签
         if (isTimeField && hasOnUpdateCurrentTime) {
           gormTags += ';autoUpdateTime';
+        } else if (isTimeField && hasCurrentTimeDefault) {
+          // 如果是时间字段且有当前时间默认值，添加autoCreateTime标签
+          gormTags += ';autoCreateTime';
         }
         tags += ` gorm:\"${gormTags}\"`;
       }
