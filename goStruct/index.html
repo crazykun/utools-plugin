@@ -41,8 +41,13 @@
     #outputPanel div {
       display: flex;
       align-items: center;
+      justify-content: flex-end;
       margin-bottom: 10px;
       height: 40px;
+    }
+
+    #inputPanel div {
+      justify-content: flex-start;
     }
 
     textarea {
@@ -51,10 +56,11 @@
       border: 1px solid #ced4da;
       border-radius: 5px;
       padding: 10px;
-      font-size: 14px;
+      font-size: 12px;
       resize: none;
       box-sizing: border-box;
       background-color: #f8f9fa;
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
     }
 
     label {
@@ -73,87 +79,126 @@
       cursor: pointer;
       font-size: 14px;
       transition: background-color 0.3s ease;
+      width: 100px;
+      text-align: center;
     }
 
     button:hover {
       background-color: #0056b3;
     }
 
-    .copy {
+    .buttons-group {
       display: flex;
-      /* 启用 Flex 布局 */
-      justify-content: flex-end;
-      /* 右对齐 */
-      margin-bottom: 10px;
+      align-items: center;
+      gap: 10px;
+    }
+
+    #wrapToggle {
+      background-color: #6c757d;
+    }
+
+    #wrapToggle:hover {
+      background-color: #545b62;
+    }
+
+    #wrapToggle.active {
+      background-color: #28a745;
+    }
+
+    #wrapToggle.active:hover {
+      background-color: #218838;
     }
 
     .toast {
       visibility: hidden;
-      min-width: 250px;
-      margin-left: -125px;
-      background-color: #333;
+      min-width: 120px;
+      max-width: 200px;
+      margin-left: -60px;
+      background-color: #28a745;
       color: #fff;
       text-align: center;
-      border-radius: 5px;
-      padding: 10px;
+      border-radius: 20px;
+      padding: 8px 16px;
       position: fixed;
-      z-index: 1;
+      z-index: 1000;
       left: 50%;
-      bottom: 30px;
-      font-size: 17px;
+      top: 20px;
+      font-size: 12px;
+      font-weight: 500;
+      box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+      border: 1px solid rgba(255, 255, 255, 0.2);
     }
 
     .toast.show {
       visibility: visible;
-      -webkit-animation: fadein 0.5s, fadeout 0.5s 2.5s;
-      animation: fadein 0.5s, fadeout 0.5s 2.5s;
+      -webkit-animation: slideDown 0.3s ease-out, slideUp 0.3s ease-in 2s;
+      animation: slideDown 0.3s ease-out, slideUp 0.3s ease-in 2s;
     }
 
-    @-webkit-keyframes fadein {
+    .toast.error {
+      background-color: #dc3545;
+      box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+    }
+
+    .toast.warning {
+      background-color: #ffc107;
+      color: #212529;
+      box-shadow: 0 4px 12px rgba(255, 193, 7, 0.3);
+    }
+
+    @-webkit-keyframes slideDown {
       from {
-        bottom: 0;
+        top: -50px;
         opacity: 0;
+        transform: translateY(-20px) scale(0.9);
       }
 
       to {
-        bottom: 30px;
+        top: 20px;
         opacity: 1;
+        transform: translateY(0) scale(1);
       }
     }
 
-    @keyframes fadein {
+    @keyframes slideDown {
       from {
-        bottom: 0;
+        top: -50px;
         opacity: 0;
+        transform: translateY(-20px) scale(0.9);
       }
 
       to {
-        bottom: 30px;
+        top: 20px;
         opacity: 1;
+        transform: translateY(0) scale(1);
       }
     }
 
-    @-webkit-keyframes fadeout {
+    @-webkit-keyframes slideUp {
       from {
-        bottom: 30px;
+        top: 20px;
         opacity: 1;
+        transform: translateY(0) scale(1);
       }
 
       to {
-        bottom: 0;
+        top: -50px;
         opacity: 0;
+        transform: translateY(-20px) scale(0.9);
       }
     }
 
-    @keyframes fadeout {
+    @keyframes slideUp {
       from {
-        bottom: 30px;
+        top: 20px;
         opacity: 1;
+        transform: translateY(0) scale(1);
       }
 
       to {
-        bottom: 0;
+        top: -50px;
         opacity: 0;
+        transform: translateY(-20px) scale(0.9);
       }
     }
   </style>
@@ -166,12 +211,14 @@
         <label><input type="checkbox" id="jsonTag" checked> JSON</label>
         <label><input type="checkbox" id="gormTag" checked> GORM</label>
         <label><input type="checkbox" id="xmlTag"> XML</label>
-        <button onclick="convert()">转换</button>
       </div>
       <textarea id="inputText" placeholder="Enter JSON or SQL DDL..."></textarea>
     </div>
     <div id="outputPanel">
-      <div class="copy"><button onclick="copyToClipboard()">复制</button></div>
+      <div class="buttons-group">
+        <button id="wrapToggle" onclick="toggleWrap()">↦换行</button>
+        <button onclick="convertAndCopy()">✢转换</button>
+      </div>
       <textarea id="outputText"></textarea>
     </div>
   </div>
